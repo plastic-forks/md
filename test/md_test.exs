@@ -286,6 +286,57 @@ defmodule MdTest do
            ] == Md.parse(input).ast
   end
 
+  test "nested list containing different types of lists" do
+    input = """
+    1. 1 | 1
+      - 2 | 1
+      - 2 | 2
+    2. 1 | 2
+      - 2 | 3
+    3. 1 | 3
+    """
+
+    assert [
+             {:ol, nil,
+              [
+                {:li, nil, ["1 | 1"]},
+                {:ul, nil,
+                 [
+                   {:li, nil, ["2 | 1"]},
+                   {:li, nil, ["2 | 2"]}
+                 ]},
+                {:li, nil, ["1 | 2"]},
+                {:ul, nil, [{:li, nil, ["2 | 3"]}]},
+                {:li, nil, ["1 | 3"]}
+              ]}
+           ] == Md.parse(input).ast
+  end
+
+  test "deeply nested list containing different types of lists" do
+    input = """
+    1. 1 | 1
+      - 2 | 1
+        - 3 | 1
+          1. 4 | 1
+      - 2 | 2
+    2. 1 | 2
+    """
+
+    assert [
+             {:ol, nil,
+              [
+                {:li, nil, ["1 | 1"]},
+                {:ul, nil,
+                 [
+                   {:li, nil, ["2 | 1"]},
+                   {:ul, nil, [{:li, nil, ["3 | 1"]}, {:ol, nil, [{:li, nil, ["4 | 1"]}]}]},
+                   {:li, nil, ["2 | 2"]}
+                 ]},
+                {:li, nil, ["1 | 2"]}
+              ]}
+           ] == Md.parse(input).ast
+  end
+
   test "list from #12" do
     input = ["- a - ", "- 1. ", "1. - "]
 
